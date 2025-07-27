@@ -9,4 +9,6 @@ dependencies = [
     "google-auth-httplib2>=0.2.0",
     "google-api-python-client>=2.100.0",
     "click>=8.0.0",
+    "inquirer>=3.4.0",
+    "rich>=14.1.0",
 ]

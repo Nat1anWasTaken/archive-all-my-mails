@@ -1,7 +1,10 @@
-import getpass
 import sys
 
 import click
+import inquirer
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Confirm
 
 from src.gmail_archiver import GmailArchiver
 
@@ -20,23 +23,32 @@ from src.gmail_archiver import GmailArchiver
 @click.option("--yes", is_flag=True, help="Skip confirmation prompt")
 def main(dry_run, client_id, client_secret, batch_size, yes):
     """Archive all emails from Gmail inbox using the Gmail API."""
-
-    print("Gmail Email Archiver")
-    print("=" * 50)
+    console = Console()
+    
+    console.print(Panel.fit(
+        "[bold blue]Gmail Email Archiver[/bold blue]",
+        border_style="blue"
+    ))
 
     if not client_id:
-        client_id = input("Enter your Google OAuth Client ID: ").strip()
+        questions = [
+            inquirer.Text('client_id', message="Enter your Google OAuth Client ID")
+        ]
+        answers = inquirer.prompt(questions)
+        client_id = answers['client_id'].strip() if answers else None
 
     if not client_secret:
-        client_secret = getpass.getpass(
-            "Enter your Google OAuth Client Secret: "
-        ).strip()
+        questions = [
+            inquirer.Password('client_secret', message="Enter your Google OAuth Client Secret")
+        ]
+        answers = inquirer.prompt(questions)
+        client_secret = answers['client_secret'].strip() if answers else None
 
     if not client_id or not client_secret:
-        print("❌ Both Client ID and Client Secret are required")
+        console.print("[bold red]❌ Both Client ID and Client Secret are required[/bold red]")
         sys.exit(1)
 
-    print("\n🔐 Authenticating with Google...")
+    console.print("\n[yellow]🔐 Authenticating with Google...[/yellow]")
     archiver = GmailArchiver(client_id=client_id, client_secret=client_secret)
 
     try:
@@ -44,50 +56,65 @@ def main(dry_run, client_id, client_secret, batch_size, yes):
 
         inbox_count = archiver.get_inbox_count()
         if inbox_count == 0:
-            print("No emails found in inbox. Nothing to archive.")
+            console.print("[green]✅ No emails found in inbox. Nothing to archive.[/green]")
             return
 
-        print(f"Found approximately {inbox_count} emails in inbox")
+        console.print(f"[cyan]📧 Found approximately {inbox_count} emails in inbox[/cyan]")
 
         if dry_run:
-            print("\n🔍 DRY RUN MODE - No changes will be made")
+            console.print(Panel(
+                "[bold yellow]🔍 DRY RUN MODE - No changes will be made[/bold yellow]",
+                border_style="yellow"
+            ))
         else:
-            print("\n⚠️  This will archive ALL emails from your inbox!")
-            print(
-                "Archived emails will remain accessible in 'All Mail' but will be removed from inbox."
-            )
+            console.print(Panel(
+                "[bold red]⚠️  This will archive ALL emails from your inbox![/bold red]\n"
+                "[dim]Archived emails will remain accessible in 'All Mail' but will be removed from inbox.[/dim]",
+                border_style="red",
+                title="Warning"
+            ))
 
         if not yes and not dry_run:
-            if not click.confirm("\nDo you want to continue?"):
-                print("Operation cancelled.")
+            if not Confirm.ask("\n[bold]Do you want to continue?[/bold]"):
+                console.print("[yellow]Operation cancelled.[/yellow]")
                 return
 
-        print("\nStarting archiving process...")
+        console.print("\n[bold green]🚀 Starting archiving process...[/bold green]")
         result = archiver.archive_all_inbox_emails(
             dry_run=dry_run, batch_size=batch_size
         )
 
         if dry_run:
-            print(f"\n✅ DRY RUN: Would have archived {result['success']} emails")
+            console.print(Panel(
+                f"[bold green]✅ DRY RUN: Would have archived {result['success']} emails[/bold green]",
+                border_style="green"
+            ))
         else:
-            print("\n✅ Archiving complete!")
-            print(f"   Successfully archived: {result['success']} emails")
-            if result["failed"] > 0:
-                print(f"   Failed to archive: {result['failed']} emails")
+            console.print(Panel(
+                f"[bold green]✅ Archiving complete![/bold green]\n"
+                f"[green]📈 Successfully archived: {result['success']} emails[/green]" +
+                (f"\n[red]❌ Failed to archive: {result['failed']} emails[/red]" if result["failed"] > 0 else ""),
+                border_style="green",
+                title="Results"
+            ))
 
     except ValueError as e:
-        print(f"\n❌ Error: {e}")
-        print("\nTo get OAuth credentials:")
-        print("1. Go to https://console.developers.google.com/")
-        print("2. Create a new project or select existing one")
-        print("3. Enable Gmail API")
-        print("4. Create credentials (OAuth 2.0 client ID)")
-        print("5. Select 'Desktop Application' as application type")
-        print("6. Use the Client ID and Client Secret with this script")
+        console.print(f"\n[bold red]❌ Error: {e}[/bold red]")
+        console.print(Panel(
+            "[bold]To get OAuth credentials:[/bold]\n"
+            "1. Go to https://console.developers.google.com/\n"
+            "2. Create a new project or select existing one\n"
+            "3. Enable Gmail API\n"
+            "4. Create credentials (OAuth 2.0 client ID)\n"
+            "5. Select 'Desktop Application' as application type\n"
+            "6. Use the Client ID and Client Secret with this script",
+            border_style="blue",
+            title="Setup Instructions"
+        ))
         sys.exit(1)
 
     except Exception as e:
-        print(f"\n❌ An error occurred: {e}")
+        console.print(f"\n[bold red]❌ An error occurred: {e}[/bold red]")
         sys.exit(1)
 
 
@@ -96,21 +123,33 @@ def main(dry_run, client_id, client_secret, batch_size, yes):
 @click.option("--client-secret", help="Google OAuth Client Secret")
 def status(client_id, client_secret):
     """Check inbox status without making changes."""
+    console = Console()
+    
     if not client_id:
-        client_id = input("Enter your Google OAuth Client ID: ").strip()
+        questions = [
+            inquirer.Text('client_id', message="Enter your Google OAuth Client ID")
+        ]
+        answers = inquirer.prompt(questions)
+        client_id = answers['client_id'].strip() if answers else None
 
     if not client_secret:
-        client_secret = getpass.getpass(
-            "Enter your Google OAuth Client Secret: "
-        ).strip()
+        questions = [
+            inquirer.Password('client_secret', message="Enter your Google OAuth Client Secret")
+        ]
+        answers = inquirer.prompt(questions)
+        client_secret = answers['client_secret'].strip() if answers else None
 
     archiver = GmailArchiver(client_id=client_id, client_secret=client_secret)
     try:
         archiver.connect()
         count = archiver.get_inbox_count()
-        print(f"Inbox contains approximately {count} emails")
+        console.print(Panel(
+            f"[bold cyan]📧 Inbox contains approximately {count} emails[/bold cyan]",
+            border_style="cyan",
+            title="Inbox Status"
+        ))
     except Exception as e:
-        print(f"Error checking status: {e}")
+        console.print(f"[bold red]❌ Error checking status: {e}[/bold red]")
 
 
 if __name__ == "__main__":
