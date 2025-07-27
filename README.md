@@ -13,6 +13,14 @@ A Python tool to archive all emails from your Gmail inbox using the Gmail API. E
 
 ## Installation
 
+### Option 1: Install from PyPI (Recommended)
+
+```bash
+pip install archive-all-my-mails
+```
+
+### Option 2: Install from source
+
 1. Clone this repository:
 
    ```bash
@@ -75,19 +83,19 @@ Before using the archiver, you need to set up OAuth credentials with Google.
 
 ```bash
 # Check inbox status (dry run to see what would be archived)
-python main.py --dry-run
+archive-gmail --dry-run
 
 # Archive all emails with confirmation prompt
-python main.py
+archive-gmail
 
 # Archive all emails without confirmation
-python main.py --yes
+archive-gmail --yes
 
 # Provide credentials as command line arguments
-python main.py --client-id "your-client-id" --client-secret "your-secret"
+archive-gmail --client-id "your-client-id" --client-secret "your-secret"
 
 # Process in smaller batches (default is 100)
-python main.py --batch-size 50
+archive-gmail --batch-size 50
 ```
 
 ### First Run Authentication

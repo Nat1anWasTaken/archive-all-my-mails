@@ -1,9 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "archive-all-my-mails"
 version = "0.1.0"
-description = "A Python script to archive all emails using Gmail API"
+description = "A Python tool to archive all emails from Gmail inbox using the Gmail API"
 readme = "README.md"
 requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Nathan"},
+]
+keywords = ["gmail", "email", "archive", "google-api", "productivity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Email",
+    "Topic :: Office/Business",
+    "Topic :: Utilities",
+]
 dependencies = [
     "google-auth-oauthlib>=1.1.0",
     "google-auth-httplib2>=0.2.0",
@@ -12,3 +33,32 @@ dependencies = [
     "inquirer>=3.4.0",
     "rich>=14.1.0",
 ]
+
+[project.scripts]
+archive-gmail = "archive_all_my_mails.main:main"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/nathanael/archive-all-my-mails"
+Repository = "https://github.com/nathanael/archive-all-my-mails"
+Issues = "https://github.com/nathanael/archive-all-my-mails/issues"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C4", "PIE", "T20"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
