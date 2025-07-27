@@ -51,7 +51,7 @@ Repository = "https://github.com/nathanael/archive-all-my-mails"
 Issues = "https://github.com/nathanael/archive-all-my-mails/issues"
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
