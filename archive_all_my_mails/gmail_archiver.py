@@ -1,4 +1,5 @@
 import time
+from typing import TYPE_CHECKING
 
 from googleapiclient.errors import HttpError
 from rich.console import Console
@@ -13,14 +14,19 @@ from rich.progress import (
 
 from .auth import GmailAuth
 
+if TYPE_CHECKING:
+    from googleapiclient.discovery import Resource
+
 
 class GmailArchiver:
-    def __init__(self, client_id=None, client_secret=None, token_file="token.pickle"):
+    def __init__(
+        self, client_id: str | None = None, client_secret: str | None = None, token_file: str = "token.pickle"
+    ) -> None:
         self.auth = GmailAuth(client_id, client_secret, token_file)
-        self.service = None
+        self.service: Resource | None = None
         self.console = Console()
 
-    def connect(self):
+    def connect(self) -> None:
         try:
             self.service = self.auth.get_gmail_service()
             self.console.print("[bold green]✅ Successfully connected to Gmail API[/bold green]")
@@ -220,10 +226,13 @@ class GmailArchiver:
         if not self.service:
             self.connect()
 
+        if not self.service:
+            raise RuntimeError("Failed to connect to Gmail API")
+
         try:
             results = self.service.users().messages().list(userId="me", q="in:inbox", maxResults=1).execute()
 
-            estimated_count = results.get("resultSizeEstimate", 0)
+            estimated_count: int = results.get("resultSizeEstimate", 0)
             return estimated_count
         except HttpError as error:
             self.console.print(f"[red]❌ Error getting inbox count: {error}[/red]")

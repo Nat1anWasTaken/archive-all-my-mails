@@ -19,7 +19,7 @@ from .gmail_archiver import GmailArchiver
 @click.option("--client-secret", help="Google OAuth Client Secret")
 @click.option("--batch-size", default=100, help="Number of emails to process in each batch")
 @click.option("--yes", is_flag=True, help="Skip confirmation prompt")
-def main(dry_run, client_id, client_secret, batch_size, yes):
+def main(dry_run: bool, client_id: str | None, client_secret: str | None, batch_size: int, yes: bool) -> None:
     """Archive all emails from Gmail inbox using the Gmail API."""
     console = Console()
 
@@ -120,7 +120,7 @@ def main(dry_run, client_id, client_secret, batch_size, yes):
 @click.command()
 @click.option("--client-id", help="Google OAuth Client ID")
 @click.option("--client-secret", help="Google OAuth Client Secret")
-def status(client_id, client_secret):
+def status(client_id: str | None, client_secret: str | None) -> None:
     """Check inbox status without making changes."""
     console = Console()
 

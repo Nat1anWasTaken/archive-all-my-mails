@@ -1,21 +1,28 @@
 import os
 import pickle
+from typing import TYPE_CHECKING
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
+if TYPE_CHECKING:
+    from google.auth.credentials import Credentials
+    from googleapiclient.discovery import Resource
+
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 
 
 class GmailAuth:
-    def __init__(self, client_id=None, client_secret=None, token_file="token.pickle"):
+    def __init__(
+        self, client_id: str | None = None, client_secret: str | None = None, token_file: str = "token.pickle"
+    ) -> None:
         self.client_id = client_id
         self.client_secret = client_secret
         self.token_file = token_file
         self.creds = None
 
-    def authenticate(self):
+    def authenticate(self) -> "Credentials":
         if os.path.exists(self.token_file):
             with open(self.token_file, "rb") as token:
                 self.creds = pickle.load(token)
@@ -47,8 +54,11 @@ class GmailAuth:
             with open(self.token_file, "wb") as token:
                 pickle.dump(self.creds, token)
 
+        if self.creds is None:
+            raise RuntimeError("Failed to authenticate")
+
         return self.creds
 
-    def get_gmail_service(self):
+    def get_gmail_service(self) -> "Resource":
         creds = self.authenticate()
         return build("gmail", "v1", credentials=creds)
