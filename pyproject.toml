@@ -1,7 +1,12 @@
 [project]
 name = "archive-all-my-mails"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python script to archive all emails using Gmail API"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "google-auth-oauthlib>=1.1.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-api-python-client>=2.100.0",
+    "click>=8.0.0",
+]
